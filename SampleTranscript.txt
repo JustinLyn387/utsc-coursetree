@@ -1,0 +1,24 @@
+2017 Fall - Honours Bachelor of Science (Computer Science, Mathematics
+ &   Statistics - Co-op)                                                        
+Sessional GPA   *.**  Cumulative GPA  *.**                                  Status: Not assessed                                                       
+Crs Code  Title                                    Wgt  Mrk  Grd  CrsAvg   
+ASTA01H3  Introduction to Astronomy and            0.50  **  CR     B-     
+          Astrophysics I: The Sun and Planets                              
+COPD01H3  Navigating the World of Work             0.00      CR            
+CSCA08H3  Introduction to Computer Science I       0.50  **  CR     C+     
+CSCA67H3  Discrete Mathematics                     0.50  **  CR     C+     
+MATA31H3  Calculus I for Mathematical Sciences     0.50  **  CR     B-     
+MGTA01H3  Introduction to Business                 0.50  **  CR     C+     
+Credits Earned: 2.50
+2018 Winter - Honours Bachelor of Science (Computer Science, Mathematics
+ & Statistics - Co-op)                                                        
+Sessional GPA   *.**  Annual GPA      *.**  Cumulative GPA  *.**            Status: In good standing                                                   
+Crs Code  Title                                    Wgt  Mrk  Grd  CrsAvg   
+COPD03H3  Co-op Arts and Science Work Prep         0.00      CR            
+CSCA48H3  Introduction to Computer Science II      0.50  **  CR     B-     
+MATA22H3  Linear Algebra I for Mathematical        0.50  **  CR     C-     
+          Sciences                                                         
+MATA37H3  Calculus II for Mathematical Sciences    0.50  **  CR     C      
+MGEA05H3  Introduction to Macroeconomics           0.50  **  CR     C+     
+MGTA02H3  Managing the Business Organization       0.50  **  CR     B-     
+Credits Earned: 2.50
