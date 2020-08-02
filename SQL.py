@@ -94,7 +94,7 @@ def searchPre(connection, course):
     sql = ''' SELECT Prerequisite FROM CourseDirectory WHERE name LIKE ? '''
     cur = connection.cursor()
     # Execute the query
-    cur.execute(sql, ["%"+course+"%"])
+    cur.execute(sql, ["%" + course + "%"])
     prereqs = cur.fetchone()
     # Return the prereqs
     return str(prereqs).strip('()')
@@ -110,13 +110,13 @@ def getDirectory(connection, modifier, param):
         # Execute the command
         cur.execute('''SELECT ID, Sections FROM MainDirectory''')
     elif modifier == 1:
-        cur.execute('''SELECT ID, SubSections FROM SubDirectory WHERE MainID=? ''', (param, ))
+        cur.execute('''SELECT ID, SubSections FROM SubDirectory WHERE MainID=? ''', (param,))
     elif modifier == 123:
         cur.execute('''SELECT ID, SubSections FROM SubDirectory ''')
     elif modifier == 2:
         cur.execute('''SELECT Name FROM CourseDirectory''')
     else:
-        cur.execute('''SELECT Name FROM CourseDirectory WHERE SubID=? ''', (param, ))
+        cur.execute('''SELECT Name FROM CourseDirectory WHERE SubID=? ''', (param,))
     directory = cur.fetchall()
     # Return the dir
     return directory
@@ -129,7 +129,7 @@ def getInformation(connection, course):
     # Create the command template
     cur = connection.cursor()
     # Execute the command
-    cur.execute(''' SELECT * FROM CourseDirectory WHERE name =?''', (course, ))
+    cur.execute(''' SELECT * FROM CourseDirectory WHERE name =?''', (course,))
     information = cur.fetchall()
     # Return the info
     return information
@@ -189,7 +189,7 @@ def getSpecialCases(connection, special):
     # Create the command template
     cur = connection.cursor()
     # Execute the command
-    cur.execute(''' SELECT Prerequisite FROM CourseDirectory WHERE PrereqCode = ?''', (special, ))
+    cur.execute(''' SELECT Prerequisite FROM CourseDirectory WHERE PrereqCode = ?''', (special,))
     specialCases = cur.fetchall()
     # Return the info
     return specialCases
@@ -256,7 +256,7 @@ def getUpdateNotes(connection):
     """
     # Create the command template
     cur = connection.cursor()
-    cur.execute( ''' SELECT Title, Body, Type, Colour, Date  FROM UpdateNotes ''')
+    cur.execute(''' SELECT Title, Body, Type, Colour, Date  FROM UpdateNotes ''')
     notes = cur.fetchall()
     # Return the notes
     return notes
@@ -318,3 +318,19 @@ def getComments(connection, courseID):
     comments = cur.fetchall()
     # Return the info
     return comments
+
+
+def modifyComment(connection, commentID, action, user):
+    """
+    This function will flag or unflag a comment
+    """
+    # Create the command template
+    cur = connection.cursor()
+    # Execute the command
+    if action == 1:
+        cur.execute(''' UPDATE CourseComments SET Flagged = 3524433, FlaggedBy = ? WHERE ID = ?  ''', (user, commentID,))
+    else:
+        cur.execute(''' UPDATE CourseComments SET Flagged = 6603524, FlaggedBy = ? WHERE ID = ?  ''', (user, commentID,))
+    connection.commit()
+    # Return the ID
+    return cur.lastrowid

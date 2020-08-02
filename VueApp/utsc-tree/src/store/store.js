@@ -55,6 +55,15 @@ export default new Vuex.Store({
             state.user.access = 2
           }
         })
+        // Update last login time
+        firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).update({
+          lastLogin: firebase.auth().currentUser.metadata.lastSignInTime
+        }).then(response => {
+          state.authError.error = false
+        }).catch(err => {
+          state.authError.error = true
+          state.authError.message = err.message
+        })
       } else {
         state.user.loggedIn = false
         state.user.access = 0

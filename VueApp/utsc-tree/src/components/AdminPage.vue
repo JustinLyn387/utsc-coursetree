@@ -229,6 +229,7 @@ export default {
     editedItem: { user: '', lvl: '' },
     defaultItem: { user: '', lvl: '' },
     commentHeaders: [
+      { text: 'ID', value: 'ID' },
       { text: 'Course', align: 'left', value: 'course' },
       { text: 'Comment', value: 'comment' },
       { text: 'User', value: 'user' },
@@ -252,7 +253,9 @@ export default {
         // Load the users from firestore
         firebase.firestore().collection('users').onSnapshot(snapshot => {
           snapshot.docs.forEach(doc => {
-            let dummyEntry = { user: doc.data().email, uid: doc.data().uid, login: doc.data().lastLogin, created: doc.data().createdOn }
+            let lastLogin = new Date(doc.data().lastLogin)
+            let createdOn = new Date(doc.data().createdOn)
+            let dummyEntry = { user: doc.data().email, uid: doc.data().uid, login: lastLogin.toString().substring(0, 24), created: createdOn.toString().substring(0, 24) }
             this.users.push(dummyEntry)
           })
         })
@@ -287,6 +290,11 @@ export default {
           let addAdminRole = firebase.functions().httpsCallable('addAdminRole')
           addAdminRole({ email: this.editedItem.user }).then(result => {
             this.showSnack('ADMIN role granted!')
+          })
+        } else if (this.editedItem.lvl === '2') {
+          let addFlaggedUser = firebase.functions().httpsCallable('resetUserRole')
+          addFlaggedUser({ email: this.editedItem.user }).then(result => {
+            this.showSnack('User role was reset!')
           })
         } else if (this.editedItem.lvl === '1') {
           let addFlaggedUser = firebase.functions().httpsCallable('addFlaggedUser')
@@ -356,6 +364,10 @@ export default {
     },
     dataButton (option) {
       if (option === 'Reset') {
+        // Update the last login time in firestore
+        firebase.firestore().collection('users').doc('sgFbTUeabVg1Kcj5yGUL0G0rQHJ3').update({
+          lastLogin: firebase.auth().currentUser.metadata.lastSignInTime
+        })
         this.showSnack('Analytics reset!')
       } else if (option === 'Refresh') {
         this.showSnack('An email will be sent once database has been refreshed!')
@@ -366,9 +378,24 @@ export default {
       }
     },
     commentAction (action, comment) {
+      let item = { comment: '' }
+      let message = ''
       if (action === 'flag') {
-        // console.log(comment)
+        item = { comment: { 'ID': comment['ID'], 'action': 1, 'user': this.$store.state.user.displayName } }
+        message = 'flagged!'
+      } else {
+        item = { comment: { 'ID': comment['ID'], 'action': 0, 'user': this.$store.state.user.displayName } }
+        message = 'unflagged!'
       }
+      axios.post('http://127.0.0.1:5000/DataPosting/editcomment', item)
+        .then(response => {
+          if (response.data === 'SUCCESS') {
+            this.showSnack('Comment successfully ' + message)
+          }
+        })
+        .catch(function () {
+          this.showSnack('An error occurred!')
+        })
     }
   },
   watch: {
@@ -479,7 +506,7 @@ export default {
   .adminContainer{
     padding: 25px 0 0 0;
     min-width: 95%;
-    min-height: 93.5vh;
+    min-height: 95.35vh;
     background-color: #3b5998;
   }
   .contentContainer{
@@ -496,7 +523,7 @@ export default {
     color: white;
   }
   .buttonCluster{
-    padding-left: 3%;
+    text-align: center;
   }
   .adminSubhead{
     text-align: center;

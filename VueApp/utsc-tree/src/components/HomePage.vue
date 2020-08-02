@@ -48,7 +48,7 @@ export default {
     background: url("../assets/background1.jpeg");
     background-size: cover;
     max-width: 100%;
-    height: 93.5vh;
+    height: 95.35vh;
   }
 
   .heading1{

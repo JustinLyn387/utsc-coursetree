@@ -5,7 +5,7 @@
       <v-col class="leftColumn">
         <v-row class="courseSearch">
           <v-autocomplete :items="courses" v-model="selectedCourse" label="Search for a course ..."
-                          clearable hint="Ex. 'CSCA08H3' or 'Elementary Musicianship I'" flat color="warning">
+                          flat color="warning">
           </v-autocomplete>
         </v-row>
         <v-row class="subCourseSearch">
@@ -189,13 +189,7 @@ export default {
     searching: false,
     topDirectory1: [ { letter: 'A' }, { letter: 'B' }, { letter: 'C' }, { letter: 'D' }, { letter: 'E' }, { letter: 'F' }, { letter: 'G' }, { letter: 'H' }, { letter: 'I' } ],
     topDirectory2: [ { letter: 'J' }, { letter: 'L' }, { letter: 'M' }, { letter: 'N' }, { letter: 'P' }, { letter: 'R' }, { letter: 'S' }, { letter: 'T' }, { letter: 'W' } ],
-    courseComments: [
-      { user: 'Justin Lyn', difficulty: 5, bird: 'Yes', recommend: 'Yes!', comment: 'BLAH BLAH BLAH BLAH', date: 'January 12/2020' },
-      { user: 'Bob', difficulty: 3, bird: 'Yes', recommend: 'NO!', comment: 'BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH', date: 'February 12/2020' },
-      { user: 'RiceBoy', difficulty: 4, bird: 'No', recommend: 'Yes!', comment: 'BLAH BLAH BLAH BLAH', date: 'March 12/2020' },
-      { user: 'Ashley', difficulty: 1, bird: 'Yes', recommend: 'Yes', comment: 'BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH', date: 'April 12/2020' },
-      { user: 'Timothy E', difficulty: 2, bird: 'No', recommend: 'NO!', comment: 'BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH', date: 'May 12/2020' }
-    ]
+    courseComments: []
   }),
   // Watcher so when they select from the autocomplete we can call the function to get the info
   watch: {
@@ -304,6 +298,7 @@ export default {
       this.userComment.date = new Date().toLocaleString()
       this.userComment.courseid = this.courseInfo.id
       this.userComment.course = this.courseInfo.name
+      this.userComment.user = this.$store.state.user.displayName
       this.courseComments.push(this.userComment)
       this.numOfComments = this.courseComments.length
       // Save the comment in the database
@@ -336,8 +331,8 @@ export default {
     padding-top: 10px;
   }
   .listScroll{
-    height: 56vh;
     min-width: 95%;
+    max-height: 69vh;
     overflow-y: auto;
   }
   .container{

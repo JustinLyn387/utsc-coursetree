@@ -13,10 +13,11 @@
         </v-row>
         <v-row class="rowSeparator">
           <v-card class="cardStyles">
-            <h2 class="pageHeader"> - Account Info - </h2>
-            <h4>Account Created:</h4>
+            <h2 class="pageHeader mb-4"> - Account Info - </h2>
+            <h4>Account Created: {{ this.accountCreation }} </h4>
+            <h4>Last Login: {{ this.lastLogin }}</h4>
             <h4>Access Level: {{ this.$store.state.user.access }}</h4>
-            <v-btn class="deleteButton" color="error" @click="deleteAccount">Delete Account</v-btn>
+            <v-btn class="deleteButton mt-6" color="error" @click="deleteAccount">Delete Account</v-btn>
           </v-card>
         </v-row>
       </v-col>
@@ -46,9 +47,8 @@
               </v-col>
             </v-container>
             <v-container v-else-if="this.tab === 'Taken'" class="mainContent">
-              <h2>Taken Courses</h2>
               <p>In this section you can view the courses that you have completed thus far in your studies. Additionally, the courses inputted will be used to better display TreeView diagrams and courses remaining to take the desired course. To populate the table simply upload a text file of your transcript.</P>
-              <v-row>
+              <v-row class="pb-4">
                 <v-col class="infoPopColumn">
                   <font-awesome-icon v-on:click="$modal.show('textSamplePopup')" class="infoIcon" :icon="['fas', 'info-circle']"/>
                 </v-col>
@@ -56,15 +56,50 @@
                   <p><b> Instructions:</b> ACORN > Academic History > Complete Academic History > Copy and paste transcript section into a text file<br><b>Note:</b> You can filter the table by clicking on any of the column names!</p>
                 </v-col>
               </v-row>
-              <v-row class="mt-0">
-                <v-col class="fileInput pt-0">
-                  <v-file-input clearable show-size counter accept="text/*" label="Upload Transcript Text File ..." id="file" ref="file" v-on:change="handleFileUpload()"></v-file-input>
-                </v-col>
-                <v-col class="submitButton pt-4 pl-6">
-                  <v-btn color="primary" v-on:click="submitFile()">Upload</v-btn>
-                </v-col>
-              </v-row>
-              <v-data-table :headers="courseHeaders" :items="courses" sort-by="date"/>
+              <v-data-table :headers="courseHeaders" :items="courses" sort-by="date">
+                <template v-slot:top>
+                  <v-toolbar flat color="white">
+                    <v-toolbar-title class="tableTitle">Course History</v-toolbar-title>
+                    <v-divider class="mx-4" inset vertical></v-divider>
+                    <template>
+                      <v-file-input class="pr-6" clearable show-size counter accept="text/*" label="Upload Transcript Text File ..." id="file" ref="file" v-on:change="handleFileUpload()"></v-file-input>
+                      <v-btn class="mr-6" color="primary" v-on:click="submitFile()">Upload</v-btn>
+                    </template>
+                    <v-dialog v-model="dialog" max-width="500px">
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn color="orange" dark v-bind="attrs" v-on="on">Manual Add</v-btn>
+                      </template>
+
+                      <v-card>
+                        <v-card-title>
+                          <span class="headline">New Course Information</span>
+                        </v-card-title>
+                        <v-card-text>
+                          <v-container>
+                            <v-row>
+                              <v-col cols="12" sm="6" md="4"><v-text-field v-model="newCourse.code" label="Course Code"></v-text-field></v-col>
+                              <v-col cols="12" sm="6" md="4"><v-text-field v-model="newCourse.date" label="Session"></v-text-field></v-col>
+                            </v-row>
+                            <v-row>
+                              <v-col cols="12" sm="6" md="12"><v-text-field v-model="newCourse.title" label="Course Name"></v-text-field></v-col>
+                            </v-row>
+                          </v-container>
+                        </v-card-text>
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
+                          <v-btn color="blue darken-1" text @click="save">Save</v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+                  </v-toolbar>
+                </template>
+                <!-- Add in the edit and delete icons for each row in the table -->
+                <template v-slot:item.action="{ item }">
+                  <a class="mr-2" @click="editItem(item)"><font-awesome-icon :icon="['fa', 'edit']"/></a>
+                  <a @click="deleteItem(item)"><font-awesome-icon :icon="['fa', 'trash']" color="red"/></a>
+                </template>
+              </v-data-table>
             </v-container>
           </v-card>
         </v-row>
@@ -91,10 +126,14 @@ export default {
   data: () => ({
     tab: 'Taken',
     file: '',
+    dialog: false,
+    accountCreation: firebase.auth().currentUser.metadata.creationTime.toString().substring(0, 16),
+    lastLogin: firebase.auth().currentUser.metadata.lastSignInTime.toString().substring(0, 16),
     courseHeaders: [
       { text: 'Course Code', align: 'left', value: 'code' },
       { text: 'Course Title', value: 'title' },
-      { text: 'Completion Date', value: 'date' }
+      { text: 'Session', value: 'date' },
+      { text: 'Actions', value: 'action', sortable: false }
     ],
     courses: [
       { code: 'CSCA08H3', title: 'Computer Science', date: '2019 Fall' },
@@ -107,6 +146,9 @@ export default {
       { code: 'LINA01H3', title: 'More Linguistics', date: '2019 Fall' },
       { code: 'CSCA08H3', title: 'Computer Science', date: '2018 Summer' }
     ],
+    newCourse: { code: '', title: '', date: '' },
+    defaultCourse: { code: '', title: '', date: '' },
+    newCourseIndex: -1,
     snackMessage: { activate: false, message: null, timeout: 3000 }
   }),
   methods: {
@@ -151,6 +193,33 @@ export default {
         })
         this.$router.push('/')
       }
+    },
+    close () {
+      this.dialog = false
+      this.$nextTick(() => {
+        this.newCourse = Object.assign({}, this.defaultCourse)
+        this.newCourseIndex = -1
+      })
+    },
+    save () {
+      if (this.newCourseIndex > -1) {
+        Object.assign(this.courses[this.newCourseIndex], this.newCourse)
+      } else {
+        this.courses.push(this.newCourse)
+      }
+      this.close()
+    },
+    // This method is for when they want to edit a course
+    editItem (item) {
+      this.newCourseIndex = this.courses.indexOf(item)
+      this.newCourse = Object.assign({}, item)
+      this.dialog = true
+    },
+    // This method will get the index of desired user and confirm before splicing it out
+    // Will have to modify and add an API call for when deleting in the database
+    deleteItem (item) {
+      const index = this.courses.indexOf(item)
+      confirm('Are you sure you want to delete this course?') && this.courses.splice(index, 1)
     }
   }
 }
@@ -161,7 +230,12 @@ export default {
     padding: 25px 0 0 0;
     min-width: 95%;
     background-color: cornflowerblue;
-    min-height: 93.5vh;
+    min-height: 95.35vh;
+  }
+  .tableTitle{
+    font-weight: bold;
+    font-size: 32px;
+    padding-bottom: 10px;
   }
   .pageHeader{
     text-align: center;
@@ -194,12 +268,6 @@ export default {
   .dashSubhead{
     text-align: center;
     font-weight: bold;
-  }
-  .fileInput{
-    max-width: 85%;
-  }
-  .submitButton{
-    max-width: 15%;
   }
 
 </style>

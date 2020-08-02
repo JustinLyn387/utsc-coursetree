@@ -10,14 +10,14 @@
             </div>
           </div>
           <div>
-            <input v-model="credentials.password1" class="input" type="password" placeholder="Password"  v-on:keyup.enter="login">
+            <input v-model="credentials.password1" class="input" type="password" placeholder="Password"  v-on:keyup.enter="login(false)">
           </div>
           <div>
             <p class="pt-2" v-if="this.$store.state.authError.error">{{ this.$store.state.authError.message }}</p>
           </div>
 
           <div v-bind:class="{'text-center': !this.$store.state.authError.error, 'textWithError': this.$store.state.authError.error}">
-            <v-btn color="primary" v-on:click="login">Sign In</v-btn>
+            <v-btn color="primary" v-on:click="login(false)">Sign In</v-btn>
           </div>
 
           <div class="registerOp">
@@ -79,14 +79,7 @@ export default {
         .createUserWithEmailAndPassword(this.credentials.email, this.credentials.password2)
         .then(data => {
           // Log them in after they have been created
-          this.login()
-          // Create firestore entry for the new user
-          firebase.firestore().collection('users').doc(data.user.uid).set({
-            uid: data.user.uid,
-            email: data.user.email,
-            createdOn: data.user.metadata.creationTime,
-            lastLogin: data.user.metadata.creationTime
-          })
+          this.login(true)
         })
         // output error message if any
         .catch(err => {
@@ -94,16 +87,20 @@ export default {
           this.$store.state.authError.message = err.message
         })
     },
-    login () {
-      firebase
-        .auth()
+    login (newUser) {
+      firebase.auth()
         .signInWithEmailAndPassword(this.credentials.email, this.credentials.password1)
         .then(data => {
           this.$modal.hide('loginPopup')
-          // Update the last login time in firestore
-          firebase.firestore().collection('users').doc(data.user.uid).update({
-            lastLogin: data.user.metadata.lastSignInTime
-          })
+          if (newUser) {
+            // If its a new user, their doc hasn't been created yet
+            firebase.firestore().collection('users').doc(data.user.uid).set({
+              uid: data.user.uid,
+              email: data.user.email,
+              createdOn: data.user.metadata.creationTime,
+              lastLogin: data.user.metadata.creationTime
+            })
+          }
         })
         // output error message if any
         .catch(err => {

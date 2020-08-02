@@ -93,6 +93,11 @@ class saveComment(Resource):
         return json.loads(DataRetrieval.saveComment(newComment['comment']))
 
 
+class editComment(Resource):
+    def post(self):
+        comment = request.get_json()
+        return json.loads(DataRetrieval.editComment(comment['comment']))
+
 
 api.add_resource(prereqsTree, '/DataRetrieval/<course>')
 api.add_resource(courseDirectory, '/DataRetrieval/directory')
@@ -103,6 +108,7 @@ api.add_resource(contentLocks, '/DataRetrieval/contentLocks/<content>')
 api.add_resource(dataLoad, '/DataRetrieval/dataLoad')
 api.add_resource(saveRecord, '/DataPosting/record')
 api.add_resource(saveComment, '/DataPosting/comment')
+api.add_resource(editComment, '/DataPosting/editcomment')
 
 if __name__ == '__main__':
     app.run()
